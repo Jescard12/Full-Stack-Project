@@ -1,0 +1,76 @@
+import { useLoaderData } from "react-router";
+import { useState } from "react";
+import { getDB } from "~/db/getDB";
+import { Link } from "react-router-dom";
+export async function loader() {
+  const db = await getDB();
+  const timesheetsAndEmployees = await db.all(
+    "SELECT timesheets.*, employees.full_name, employees.id AS employee_id FROM timesheets JOIN employees ON timesheets.employee_id = employees.id"
+  );
+  return { timesheetsAndEmployees };
+}
+
+export default function TimesheetsPage() {
+  const { timesheetsAndEmployees } = useLoaderData();
+  const [isTableView, setIsTableView] = useState(true);
+
+ 
+  const toggleView = () => {
+    setIsTableView((prev) => !prev);
+  };
+
+  return (
+    <div>
+      <h1>Timesheets</h1>
+      <div>
+        <button onClick={toggleView}>{isTableView ? "Calendar View" : "Table View"}</button>
+      </div>
+
+      
+      {isTableView ? (
+        <div>
+          <table>
+            <thead>
+              <tr>
+                <th>Timesheet ID</th>
+                <th>Employee Name</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+              </tr>
+            </thead>
+            <tbody>
+              {timesheetsAndEmployees.map((timesheet: any) => (
+                <tr key={timesheet.id}>
+                  <td>{timesheet.id}</td>
+                  <td>{timesheet.full_name}</td>
+                  <td>{timesheet.start_time}</td>
+                  <td>{timesheet.end_time}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div>
+          
+          <p>
+            Calendar view is not implemented yet. You can integrate a calendar component here, such as
+            <a href="https://schedule-x.dev/docs/frameworks/react" target="_blank" rel="noopener noreferrer">
+              Schedule X React documentation
+            </a>.
+          </p>
+        </div>
+      )}
+
+      <hr />
+      <ul>
+        <li>
+          <Link to="/timesheets/new">Create New Timesheet</Link>
+        </li>
+        <li>
+          <Link to="/employees">View Employees</Link>
+        </li>
+      </ul>
+    </div>
+  );
+}

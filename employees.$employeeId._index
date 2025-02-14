@@ -1,0 +1,42 @@
+import { useLoaderData, redirect } from "react-router"
+import { getDB } from "~/db/getDB"
+
+export async function loader({ params }: { params: { employeeId: string } }) {
+  const db = await getDB()
+  const employee = await db.get("SELECT * FROM employees WHERE id = ?", [
+    params.employeeId,
+  ])
+  return { employee }
+}
+
+export default function EmployeeDetail() {
+  const { employee } = useLoaderData()
+
+  if (!employee) {
+    return <div>Employee not found.</div>
+  }
+
+  return (
+    <div>
+      <h2>Employee Detail: {employee.full_name}</h2>
+      <ul>
+        <li>Full Name: {employee.full_name}</li>
+        <li>Email: {employee.email}</li>
+        <li>Phone: {employee.phone}</li>
+        <li>Job Title: {employee.job_title}</li>
+        <li>Department: {employee.department}</li>
+        <li>Salary: ${employee.salary}</li>
+        <li>Start Date: {employee.start_date}</li>
+        <li>End Date: {employee.end_date}</li>
+      </ul>
+      <button>
+        <a href={`/employees/${employee.id}/edit`}>Edit Employee</a>
+      </button>
+      <hr />
+      <ul>
+        <li><a href="/employees">Back to Employees List</a></li>
+        <li><a href="/timesheets">Timesheets</a></li>
+      </ul>
+    </div>
+  )
+}

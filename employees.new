@@ -1,0 +1,124 @@
+import { useState } from "react"
+import { redirect } from "react-router"
+import { getDB } from "~/db/getDB"
+
+export async function action({ request }: { request: Request }) {
+  const formData = new URLSearchParams(await request.text())
+
+  const fullName = formData.get("full_name")
+  const email = formData.get("email")
+  const phone = formData.get("phone")
+  const job_title = formData.get("job_title")
+  const department = formData.get("department")
+  const salary = parseFloat(formData.get("salary") || "0")
+  const startDate = formData.get("start_date")
+  const endDate = formData.get("end_date")
+
+  const db = await getDB()
+  await db.run(
+    `INSERT INTO employees (full_name, email, phone, job_title, department, salary, start_date, end_date) 
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    [fullName, email, phone, job_title, department, salary, startDate, endDate]
+  )
+
+  return redirect("/employees")
+}
+
+export default function NewEmployee() {
+  const [formData, setFormData] = useState({
+    full_name: "",
+    email: "",
+    phone: "",
+    job_title: "",
+    department: "",
+    salary: "",
+    start_date: "",
+    end_date: "",
+  })
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
+
+  return (
+    <div>
+      <h2>Create New Employee</h2>
+      <form method="post">
+        <label>
+          Full Name:
+          <input
+            type="text"
+            name="full_name"
+            value={formData.full_name}
+            onChange={handleChange}
+          />
+        </label>
+        <label>
+          Email:
+          <input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+          />
+        </label>
+        <label>
+          Phone:
+          <input
+            type="text"
+            name="phone"
+            value={formData.phone}
+            onChange={handleChange}
+          />
+        </label>
+        <label>
+          Job Title:
+          <input
+            type="text"
+            name="job_title"
+            value={formData.job_title}
+            onChange={handleChange}
+          />
+        </label>
+        <label>
+          Department:
+          <input
+            type="text"
+            name="department"
+            value={formData.department}
+            onChange={handleChange}
+          />
+        </label>
+        <label>
+          Salary:
+          <input
+            type="number"
+            name="salary"
+            value={formData.salary}
+            onChange={handleChange}
+          />
+        </label>
+        <label>
+          Start Date:
+          <input
+            type="date"
+            name="start_date"
+            value={formData.start_date}
+            onChange={handleChange}
+          />
+        </label>
+        <label>
+          End Date:
+          <input
+            type="date"
+            name="end_date"
+            value={formData.end_date}
+            onChange={handleChange}
+          />
+        </label>
+        <button type="submit">Create Employee</button>
+      </form>
+    </div>
+  )
+}

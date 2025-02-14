@@ -1,0 +1,43 @@
+import { useLoaderData } from "react-router";
+import { getDB } from "~/db/getDB";
+
+export async function loader() {
+  const db = await getDB();
+  const employees = await db.all("SELECT * FROM employees;");
+
+  return { employees };
+}
+
+export default function EmployeesPage() {
+  const { employees } = useLoaderData();
+
+  return (
+    <div>
+      <h1>Employees</h1>
+      <div>
+        {employees.length > 0 ? (
+          employees.map((employee: any) => (
+            <div key={employee.id}>
+              <ul>
+                <li><strong>Employee #{employee.id}</strong></li>
+                <li><strong>Full Name:</strong> {employee.full_name}</li>
+                <li><strong>Email:</strong> {employee.email}</li>
+                <li><strong>Phone:</strong> {employee.phone}</li> 
+                <li><strong>Job Title:</strong> {employee.job_title}</li> 
+                <li><strong>Department:</strong> {employee.department}</li> 
+                
+              </ul>
+            </div>
+          ))
+        ) : (
+          <p>No employees found.</p>
+        )}
+      </div>
+      <hr />
+      <ul>
+        <li><a href="/employees/new">New Employee</a></li>
+        <li><a href="/timesheets/">Timesheets</a></li>
+      </ul>
+    </div>
+  );
+}
